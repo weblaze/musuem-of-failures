@@ -1,6 +1,8 @@
 import { ScrollControls, PerspectiveCamera, useScroll } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Hallway } from './Hallway';
+import { useStore } from '../../stores/useStore';
+import { useEffect } from 'react';
 import * as THREE from 'three';
 
 const CameraRig = () => {
@@ -20,16 +22,26 @@ const CameraRig = () => {
 }
 
 export const Experience = () => {
+    const fetchExhibits = useStore((state) => state.fetchExhibits);
+    const mode = useStore((state) => state.mode);
+
+    useEffect(() => {
+        fetchExhibits();
+    }, [mode]);
+
+    const isAttic = mode === 'attic';
+    const bgColor = isAttic ? '#1a1005' : '#050202';
+    const fogColor = isAttic ? '#1a1005' : '#050202';
+
     return (
         <>
-            <color attach="background" args={['#050202']} />
+            <color attach="background" args={[bgColor]} />
 
             {/* Lights */}
-            <ambientLight intensity={0.2} />
-            {/* Follow light */}
+            <ambientLight intensity={isAttic ? 0.4 : 0.2} />
             <spotLight position={[0, 10, 5]} angle={0.5} penumbra={1} intensity={1} castShadow />
 
-            <fog attach="fog" args={['#050202', 5, 25]} />
+            <fog attach="fog" args={[fogColor, 5, 25]} />
 
             <ScrollControls pages={6} damping={0.3}>
                 <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />

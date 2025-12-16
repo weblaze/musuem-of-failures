@@ -1,8 +1,16 @@
 import { useStore } from '../../stores/useStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export const Modal = () => {
-    const { modalOpen, activeItem, closeModal } = useStore();
+    const { modalOpen, activeItem, closeModal, togglePrivacy } = useStore();
+    const user = useAuthStore((state) => state.user);
+
+    // Check if the current user is the author
+    // Note: requires basic string comparison on username since authorId isn't on activeItem yet, 
+    // or better, update formatPost to include authorId but here let's assume username is unique enough for MVP
+    // For safer check, backend does validation anyway.
+    const isAuthor = user && activeItem && user.username === activeItem.author;
 
     return (
         <AnimatePresence>
@@ -33,13 +41,26 @@ export const Modal = () => {
                             <span>{activeItem.author}</span>
                             <span>•</span>
                             <span>{activeItem.date}</span>
+                            {isAuthor && (
+                                <span className={`text-xs px-2 py-0.5 border rounded ${activeItem.isPublic ? 'border-green-800 text-green-500' : 'border-red-800 text-red-500'}`}>
+                                    {activeItem.isPublic ? 'Public' : 'Private'}
+                                </span>
+                            )}
                         </div>
 
                         <p className="text-lg font-sans text-gray-300 leading-relaxed">
                             {activeItem.description}
                         </p>
 
-                        <div className="mt-8 flex justify-end">
+                        <div className="mt-8 flex justify-end gap-4">
+                            {isAuthor && (
+                                <button
+                                    className="px-4 py-2 text-sm text-zinc-400 border border-zinc-700 hover:border-white hover:text-white transition-colors rounded"
+                                    onClick={() => togglePrivacy(activeItem.id)}
+                                >
+                                    {activeItem.isPublic ? 'Make Private' : 'Make Public'}
+                                </button>
+                            )}
                             <button
                                 className="px-6 py-2 bg-burgundy/20 text-burgundy hover:bg-burgundy hover:text-white transition-colors border border-burgundy rounded hover:shadow-[0_0_15px_rgba(128,0,32,0.5)]"
                                 onClick={closeModal}

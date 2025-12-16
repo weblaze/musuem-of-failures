@@ -1,37 +1,46 @@
 import { useRef } from 'react';
 import { Frame } from './Frame';
-import { failures } from '../../data/failures';
+import { useStore } from '../../stores/useStore';
 
 export const Hallway = () => {
+    const failures = useStore((state) => state.exhibits);
+    const mode = useStore((state) => state.mode);
+    const isAttic = mode === 'attic';
+
     // Length of the hallway based on number of items
     // Spacing items 10 units apart
     const spacing = 10;
-    const length = failures.length * spacing + 20;
+    // Ensure length is at least enough for typical usage, even if empty
+    const length = Math.max(failures.length, 5) * spacing + 20;
+
+    const floorColor = isAttic ? '#2a1a0f' : '#1a0b0b';
+    const ceilingColor = isAttic ? '#2a1a0f' : '#2d1b1b';
+    const wallColor = isAttic ? '#4a3b2a' : '#4a0404';
 
     return (
         <group>
             {/* Floor */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, -length / 2]}>
                 <planeGeometry args={[10, length]} />
-                <meshStandardMaterial color="#1a0b0b" roughness={0.8} />
+                <meshStandardMaterial color={floorColor} roughness={0.8} />
             </mesh>
 
             {/* Ceiling */}
             <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 6, -length / 2]}>
                 <planeGeometry args={[10, length]} />
-                <meshStandardMaterial color="#2d1b1b" />
+                <meshStandardMaterial color={ceilingColor} />
             </mesh>
 
             {/* Left Wall */}
             <mesh position={[-5, 1.5, -length / 2]} rotation={[0, Math.PI / 2, 0]}>
                 <planeGeometry args={[length, 9]} />
-                <meshStandardMaterial color="#4a0404" />
+                <meshStandardMaterial color={wallColor} />
             </mesh>
 
             {/* Right Wall */}
             <mesh position={[5, 1.5, -length / 2]} rotation={[0, -Math.PI / 2, 0]}>
                 <planeGeometry args={[length, 9]} />
-                <meshStandardMaterial color="#4a0404" />
+                <meshStandardMaterial color={wallColor} />
             </mesh>
 
             {/* Items */}
